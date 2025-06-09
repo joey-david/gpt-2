@@ -102,28 +102,6 @@ This performs comprehensive evaluation including:
 
 ## 🎛️ Configuration Options
 
-### Model Sizes
-
-```python
-# Small model (default)
-config = GPT2Config(
-    d_model=384,
-    n_heads=6,
-    n_layers=6,
-    d_ff=1536,
-    max_seq_len=512
-)
-
-# Medium model
-config = GPT2Config(
-    d_model=512,
-    n_heads=8,
-    n_layers=8,
-    d_ff=2048,
-    max_seq_len=1024
-)
-```
-
 ### Training Parameters
 
 - **Learning Rate**: 3e-4 (with cosine annealing)
@@ -198,69 +176,6 @@ The evaluation script calculates:
 4. **Temperature Effects**: Generation quality vs creativity
 5. **Repetition Analysis**: Repetitive pattern detection
 
-## 🎨 Advanced Features
-
-### 1. Attention Visualization
-
-```python
-# Analyze attention patterns
-attention_data = evaluator.analyze_attention_patterns(text)
-```
-
-### 2. Custom Tokenizers
-
-The project includes both character-level and BPE tokenizer implementations:
-
-```python
-# Character-level (default)
-tokenizer = CharacterTokenizer()
-tokenizer.build_vocab(text)
-
-# Byte-Pair Encoding (experimental)
-bpe_tokenizer = BPETokenizer(vocab_size=1000)
-bpe_tokenizer.build_vocab(text)
-```
-
-### 3. Generation Strategies
-
-- **Greedy Decoding**: Always pick most likely token
-- **Top-k Sampling**: Sample from k most likely tokens
-- **Top-p (Nucleus) Sampling**: Sample from tokens in top p probability mass
-- **Temperature Scaling**: Control randomness/creativity
-
-### 4. Model Analysis Tools
-
-```python
-# Token prediction analysis
-predictions = evaluator.analyze_token_predictions(text)
-
-# Diverse sample generation
-samples = evaluator.generate_diverse_samples(prompts)
-
-# Text statistics
-stats = evaluator.calculate_text_statistics(generated_texts)
-```
-
-## 📋 Training Tips
-
-1. **Start Small**: Begin with a smaller model for faster iteration
-2. **Monitor Overfitting**: Watch validation loss vs training loss
-3. **Adjust Batch Size**: Based on available GPU memory
-4. **Learning Rate**: Start with 3e-4, adjust if loss doesn't decrease
-5. **Sequence Length**: Longer sequences need more memory but capture more context
-
-## 🚧 Future Enhancements
-
-Potential improvements and extensions:
-
-- [ ] **Multi-GPU Training**: Distributed training support
-- [ ] **Mixed Precision**: FP16 training for speed/memory
-- [ ] **Beam Search**: Alternative decoding strategy
-- [ ] **Fine-tuning**: Adapt to specific writing styles
-- [ ] **Web Interface**: Browser-based text generation
-- [ ] **API Server**: REST API for text generation
-- [ ] **Model Compression**: Quantization and pruning
-- [ ] **Attention Visualization**: Interactive attention heatmaps
 
 ## 🎭 Sample Outputs
 
@@ -280,29 +195,7 @@ This implementation is based on:
 - [Language Models are Unsupervised Multitask Learners](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf) (GPT-2 paper)
 - [The Illustrated GPT-2](http://jalammar.github.io/illustrated-gpt2/) (Architecture explanation)
 
-## 🤝 Contributing
-
-Feel free to contribute improvements:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
 
 ## 📄 License
 
 This project is open source and available under the MIT License.
-
-## 🙏 Acknowledgments
-
-- **Charles Dickens**: For the incredible corpus of text
-- **Project Gutenberg**: For providing free access to classic literature
-- **OpenAI**: For the GPT-2 architecture and research
-- **PyTorch Team**: For the excellent deep learning framework
-
----
-
-*"It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness..."* - Charles Dickens
-
-Happy generating! 🎉
