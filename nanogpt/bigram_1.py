@@ -60,6 +60,15 @@ class BigramLanguageModel(nn.Module):
         self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
 
     def forward(self, idx, targets=None):
+        
+        # idx and targets are both (B, T) tensors of integers
+        # so logits returned is (B, T, C) tensor of logits for each token in vocab
+        
+        # CORE OF THE BIGRAM MODEL: the logit dist is fixed for each token, so a fixed LuT
+        # that's only ever modified during training is enough
+        # the Embedding function is smart, so it knows to batch-fill the matrix given
+        # as an input with the right rows, hence why idx (B, T) gives logits (B, T, C)
+        
         logits = self.token_embedding_table(idx)
         if targets is None:
             loss = None

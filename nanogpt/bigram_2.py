@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 # hyperparams
-batch_size = 32
+batch_size = 4
 block_size = 8
 max_iters = 3000
 eval_interval = 300
@@ -11,6 +11,8 @@ learning_rate = 1e-2
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 eval_iters = 200
 train_split = 0.9
+n_embd = 32 # embedding dimension
+
 
 # load the dataset as a string
 with open('dickens/combined.txt', encoding='utf-8') as f:
@@ -53,22 +55,46 @@ def estimate_loss(model):
         out[split] = losses.mean()
     model.train()
     return out
+    
+class Head(nn.Module):
+    """One head of self-attention."""
+
+    def __init__(self, head_size):
+        self.key = nn.Linear(n_embd, head_size, bias=False)
+        self.query = nn.Linear(n_embd, head_size, bias=False)
+        self.value = nn.Linear(n_embd, head_size, bias=False)
+        self.register_buffer("tril", torch.tril(torch.ones(block_size, block_size)))
+        
+    def forward(self, x):
+        B, T, C = x.shape
+        k = self.key(x)
+        q = self.query(x)
+        v = self.value(x)
+        # compute attention scores
+        wei = q @ k.transpose(-2, -1) * C**-0.5
+        wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
+        wei = F.softmax(wei, dim=-1)
+        out = wei @ v
+        return out
+        
 
 class BigramLanguageModel(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+        self.sa_head = Head(n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size)
 
     def forward(self, idx, targets=None):
-        # idx and targets are both (B, T) tensors of integers
-        # so logits returned is (B, T, C) tensor of logits for each token in vocab
+        B, T = idx.shape
         
-        # CORE OF THE BIGRAM MODEL: the logit dist is fixed for each token, so a fixed LuT
-        # that's only ever modified during training is enough
-        # the Embedding function is smart, so it knows to batch-fill the matrix given
-        # as an input with the right rows, hence why idx (B, T) gives logits (B, T, C)
-        logits = self.token_embedding_table(idx)
+        tok_emb = self.token_embedding_table(idx) # (B, T, C)
+        pos_emb = self.position_embedding_table(torch.arange(T, device=device)) # (T, C)
+        x = tok_emb + pos_emb
+        logits = self.lm_head(x) # (B, T, vocab_size)
+
         if targets is None:
             loss = None
         else:
@@ -87,7 +113,7 @@ class BigramLanguageModel(nn.Module):
             idx_next = torch.multinomial(probs, num_samples=1)
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
-    
+
 model = BigramLanguageModel()
 m = model.to(device)
 
