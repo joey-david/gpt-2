@@ -18,6 +18,7 @@ with open('dickens/combined.txt', encoding='utf-8') as f:
 
 chars = sorted(list(set(text)))
 vocab_size = len(chars)
+
 # create mappings chars <-> ints
 stoi = {ch:i for i, ch in enumerate(chars)}
 itos = {i:ch for i, ch in enumerate(chars)}
@@ -55,11 +56,18 @@ def estimate_loss(model):
 
 class BigramLanguageModel(nn.Module):
 
-    def __init__(self, vocab_size):
+    def __init__(self):
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
 
     def forward(self, idx, targets=None):
+        # idx and targets are both (B, T) tensors of integers
+        # so logits returned is (B, T, C) tensor of logits for each token in vocab
+        
+        # CORE OF THE BIGRAM MODEL: the logit dist is fixed for each token, so a fixed LuT
+        # that's only ever modified during training is enough
+        # the Embedding function is smart, so it knows to batch-fill the matrix given
+        # as an input with the right rows, hence why idx (B, T) gives logits (B, T, C)
         logits = self.token_embedding_table(idx)
         if targets is None:
             loss = None
@@ -80,7 +88,7 @@ class BigramLanguageModel(nn.Module):
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
     
-model = BigramLanguageModel(vocab_size=vocab_size)
+model = BigramLanguageModel()
 m = model.to(device)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
@@ -99,5 +107,6 @@ for iter in range(max_iters):
     loss.backward()
     optimizer.step()
 
+# creates [[0]], a batch of size 1, with a single start token
 context = torch.zeros((1, 1), dtype=torch.long, device=device)
 print(decode(m.generate(context, max_new_tokens=500)[0].tolist()))
