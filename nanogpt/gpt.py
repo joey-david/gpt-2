@@ -163,7 +163,15 @@ losses_track = []
 for iter in range(max_iters):
     if iter % eval_interval == 0:
         losses = estimate_loss(m)
+        
+        # update the loss plot
         losses_track.append(losses['val'])
+        plt.plot(iters, losses_track)
+        plt.xlabel("iterations")
+        plt.ylabel("eval loss")
+        plt.title("eval loss of charwise gpt")
+        plt.savefig("nano_gpt/loss_graph.png")
+        
         print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
 
     # sample a batch of data
@@ -175,11 +183,6 @@ for iter in range(max_iters):
     loss.backward()
     optimizer.step()
 
-plt.plot(iters, losses_track)
-plt.xlabel("iterations")
-plt.ylabel("eval loss")
-plt.title("eval loss of charwise gpt")
-plt.savefig("loss_graph.png")
 
 # creates [[0]], a batch of size 1, with a single start token
 context = torch.zeros((1, 1), dtype=torch.long, device=device)
