@@ -16,7 +16,7 @@ n_embd = 64 # embedding dimension
 num_heads = 16
 
 # load the dataset as a string
-with open('dickens/combined.txt', encoding='utf-8') as f:
+with open('shakespeare/combined.txt', encoding='utf-8') as f:
     text = f.read()
 
 chars = sorted(list(set(text)))
@@ -109,10 +109,12 @@ class Block(nn.Module):
         head_size = n_embd // n_head
         self.sa = MultiHeadAttention(num_heads, head_size)
         self.ffwd = FeedForward(n_embd)
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.ln2 = nn.LayerNorm(n_embd)
         
     def forward(self, x):
-        x = x + self.sa(x)
-        x = x + self.ffwd(x)
+        x = x + self.sa(self.ln1(x))
+        x = x + self.ffwd(self.ln2(x))
         return x
 
 class GPTModel(nn.Module):
@@ -121,7 +123,10 @@ class GPTModel(nn.Module):
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
-        self.blocks = nn.Sequential(*[Block(n_embd, n_head) for _ in range(4)])
+        self.blocks = nn.Sequential(
+            *[Block(n_embd, n_head) for _ in range(4)],
+            nn.LayerNorm(n_embd),
+        )
         self.lm_head = nn.Linear(n_embd, vocab_size)
 
     def forward(self, idx, targets=None):

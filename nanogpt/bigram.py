@@ -13,7 +13,7 @@ eval_iters = 200
 train_split = 0.9
 
 # load the dataset as a string
-with open('dickens/combined.txt', encoding='utf-8') as f:
+with open('shakespeare/combined.txt', encoding='utf-8') as f:
     text = f.read()
 
 chars = sorted(list(set(text)))

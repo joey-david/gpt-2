@@ -1,6 +1,6 @@
 # GPT-2 Implementation from Scratch
 
-A complete implementation of GPT-2 (Generative Pre-trained Transformer 2) from scratch using PyTorch, trained on the complete works of Charles Dickens.
+A complete implementation of GPT-2 (Generative Pre-trained Transformer 2) from scratch using PyTorch, trained on the complete works of Shakespeare.
 
 ## 🚀 Features
 
@@ -51,7 +51,7 @@ python train.py
 ```
 
 This will:
-- Load and preprocess the Charles Dickens corpus
+- Load and preprocess the Shakespeare corpus
 - Build a character-level tokenizer
 - Train a GPT-2 model with the following default configuration:
   - 6 transformer layers
